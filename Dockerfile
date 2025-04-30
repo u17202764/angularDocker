@@ -1,4 +1,4 @@
-# Etapa 1: Construcción
+# Etapa 1: Construcción de la aplicación Angular
 FROM node:18 AS build
 
 WORKDIR /app
@@ -27,8 +27,11 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copiar los archivos generados en la etapa build al directorio de Nginx
 COPY --from=build /app/dist/listado-app /usr/share/nginx/html
 
-# Asegurarse de que Nginx tenga los permisos adecuados para acceder a los archivos
+# Asegurarse de que los archivos copiados tienen los permisos adecuados
 RUN chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
+
+# Verificar que la carpeta sea accesible
+RUN ls -la /usr/share/nginx/html
 
 # Exponer el puerto 80 para servir la aplicación
 EXPOSE 80
