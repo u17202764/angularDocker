@@ -11,7 +11,7 @@ import {CommonModule} from "@angular/common";
 })
 export class ListadoComponent implements OnInit {
   categorias: Categoria[] = [];
-
+  title = 'Listado de Categorías';
   constructor(private categoriaService: CategoryService) {}
 
   ngOnInit(): void {

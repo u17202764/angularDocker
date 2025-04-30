@@ -4,6 +4,5 @@ import {ListadoComponent} from "./components/listado/listado.component";
 
 export const routes: Routes = [
   { path: '', component: ListadoComponent }, // ruta por defecto
-  // Ejemplo adicional:
-  // { path: 'detalle/:id', component: DetalleComponent }
+
 ];
