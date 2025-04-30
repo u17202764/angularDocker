@@ -1,40 +1,43 @@
 # Etapa 1: Construcción de la aplicación Angular
-FROM node:18 AS build
+FROM node:18-alpine AS build
 
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar el package.json y package-lock.json al contenedor
+# Copiar archivos necesarios para instalación
 COPY package*.json ./
 
-# Instalar las dependencias del proyecto
+# Instalar dependencias
 RUN npm install
 
-# Copiar todo el proyecto al contenedor
+# Copiar el resto de la aplicación
 COPY . .
 
-# Instalar Angular CLI globalmente
+# Instalar Angular CLI (si es necesario)
 RUN npm install -g @angular/cli
 
-# Construir la aplicación Angular en modo producción
+# Compilar la aplicación Angular en modo producción
 RUN ng build --configuration production
 
-# Etapa 2: Servir con Nginx
+# Etapa 2: Servir aplicación con NGINX
 FROM nginx:alpine
 
-# Eliminar los archivos predeterminados de Nginx
+# Eliminar contenido por defecto de NGINX
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copiar los archivos generados en la etapa build al directorio de Nginx
-COPY --from=build /app/dist/listado-app /usr/share/nginx/html
+# Copiar archivos compilados desde la etapa anterior
+COPY --from=build /app/dist/* /usr/share/nginx/html
 
-# Asegurarse de que los archivos copiados tienen los permisos adecuados
-RUN chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
+# Copiar configuración personalizada de NGINX (si tienes una)
+# COPY nginx.conf /etc/nginx/nginx.conf
 
-# Verificar que la carpeta sea accesible
-RUN ls -la /usr/share/nginx/html
+# Ajustar permisos para evitar errores 401/403
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
 
-# Exponer el puerto 80 para servir la aplicación
+# Exponer el puerto 80
 EXPOSE 80
 
-# Iniciar Nginx
+# Comando por defecto de NGINX
 CMD ["nginx", "-g", "daemon off;"]
+
