@@ -25,19 +25,14 @@ FROM nginx:alpine
 # Eliminar contenido por defecto de NGINX
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copiar archivos compilados desde la etapa anterior
-COPY --from=build /app/dist/* /usr/share/nginx/html
+# Copiar archivos generados desde la etapa de build
+COPY --from=build /app/dist/listado-app/browser /usr/share/nginx/html
 
-# Copiar configuración personalizada de NGINX (si tienes una)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Copiar la configuración personalizada de NGINX
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Ajustar permisos para evitar errores 401/403
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
-
-# Exponer el puerto 80
+# Exponer el puerto
 EXPOSE 80
 
-# Comando por defecto de NGINX
+# Comando por defecto
 CMD ["nginx", "-g", "daemon off;"]
-
