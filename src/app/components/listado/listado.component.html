@@ -1,8 +1,82 @@
-<h1>{{title}}</h1>
-<h2>asds</h2>
-<ul>
-  <li *ngFor="let item of categorias">
-    {{ item.nombre }}
-    {{ item.id }}
-  </li>
-</ul>
+<div class="container">
+  @if (dataService.isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Cargando datos...</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error-message">
+      {{ errorMessage() }}
+      <button (click)="loadData()">Reintentar</button>
+    </div>
+  }
+
+  <div class="header">
+    <h2>Listado de Registros</h2>
+    <button class="refresh-btn" (click)="refreshData()" [disabled]="dataService.isLoading()">
+      Actualizar Datos
+    </button>
+  </div>
+
+  <div class="controls">
+    <div class="page-size-control">
+      <label for="pageSize">Registros por página:</label>
+      <select id="pageSize" [value]="pageSize()" (change)="changePageSize($any($event.target).value)">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of currentData(); track item.id) {
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.nombre }}</td>
+          </tr>
+        }
+        @if (currentData().length === 0 && !dataService.isLoading()) {
+          <tr>
+            <td colspan="2">No se encontraron registros</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button (click)="changePage(1)" [disabled]="currentPage() === 1">
+      &laquo; Primera
+    </button>
+    <button (click)="changePage(currentPage() - 1)" [disabled]="currentPage() === 1">
+      &lsaquo; Anterior
+    </button>
+
+    <span class="page-info">
+      Página {{ currentPage() }} de {{ totalPages() }}
+    </span>
+
+    <button (click)="changePage(currentPage() + 1)" [disabled]="currentPage() === totalPages()">
+      Siguiente &rsaquo;
+    </button>
+    <button (click)="changePage(totalPages())" [disabled]="currentPage() === totalPages()">
+      Última &raquo;
+    </button>
+  </div>
+
+  <div class="summary">
+    <p>Total de registros: {{ dataService.totalRecords() }}</p>
+  </div>
+</div>
