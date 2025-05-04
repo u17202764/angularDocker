@@ -15,9 +15,19 @@ export class ListadoComponent implements OnInit {
   constructor(private categoriaService: CategoryService) {}
 
   ngOnInit(): void {
-    this.categoriaService.getItems().subscribe(data => {
-      console.log(data);
-      this.categorias = data;
-    });
+    this.getAllData()
+  }
+
+  getAllData = ()=>{
+    this.categoriaService.getAllData().subscribe({
+      next:(value:any)=>{
+        console.log(value);
+        
+        this.categorias = value
+      },
+      error:(error:any)=>{
+        console.error(error)        
+      }
+    })
   }
 }
