@@ -1,10 +1,12 @@
 import { CommonModule } from "@angular/common";
 import {
   Component,
+  inject,
   OnInit,
   signal
 } from '@angular/core';
 import { CategoryNewService } from '../../CategoryNewService';
+import { WebsocketService } from "../../socket.service";
 
 @Component({
   selector: 'app-listado',
@@ -19,6 +21,7 @@ export class ListadoComponent implements OnInit {
   currentData = signal<any[]>([])
   totalPages = signal<number>(0)
   errorMessage = signal<string>('')
+  webSocketService = inject(WebsocketService)
 
   constructor(public dataService: CategoryNewService) {}
 
@@ -26,9 +29,12 @@ export class ListadoComponent implements OnInit {
     this.loadData()
   }
 
+  listenSocket=()=>{
+    this.webSocketService.isConnected()
+  }
+
   loadData(): void {
     this.errorMessage.set('')
-
     this.dataService.loadAllData().subscribe({
       next: () => {
         this.setupPagination()
@@ -70,16 +76,18 @@ export class ListadoComponent implements OnInit {
   }
 
   refreshData(): void {
-    this.errorMessage.set('')
-    this.dataService.forceRefresh().subscribe({
+    const nuevoObjeto = {
+      id: 9999,
+      nombre: 'Nuevo Registro'
+    }
+    this.dataService.addNewRecord(nuevoObjeto).subscribe({
       next: () => {
-        this.currentPage.set(1)
-        this.setupPagination()
-        this.loadPageData()
+        this.setupPagination();
+        this.loadPageData();
       },
       error: (err) => {
-        this.errorMessage.set('Error al actualizar los datos.')
-        console.error('Error refreshing data:', err)
+        this.errorMessage.set('Error al insertar el nuevo dato.');
+        console.error('Error al insertar:', err);
       }
     })
   }

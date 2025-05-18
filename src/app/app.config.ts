@@ -4,8 +4,14 @@ import { provideHttpClient } from '@angular/common/http';
 
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+import { provideClientHydration } from '@angular/platform-browser';
 
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideHttpClient()  ]
+  providers: [
+    provideClientHydration(),
+    {provide:'global', useValue:window},
+    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideRouter(routes), 
+    provideHttpClient()  ]
 };
