@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Client, Message, StompSubscription } from '@stomp/stompjs';
 import  SockJS from 'sockjs-client';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import { filter, first, switchMap } from 'rxjs/operators';
+import {HttpHeaders} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
@@ -12,15 +13,17 @@ export class WebsocketService {
   private connectionStatus$ = new BehaviorSubject<boolean>(false);
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 5;
-
+  private messageSubject: Subject<any> = new Subject<any>();
   constructor() {
     this.initializeWebSocketConnection();
   }
 
   private initializeWebSocketConnection(): void {
+
+
     // Configuración de la conexión WebSocket
     this.client = new Client({
-      webSocketFactory: () => new SockJS('https://cea0-38-25-28-108.ngrok-free.app/topic/registrations'),
+      webSocketFactory: () => new SockJS('https://docker-java-lmse.onrender.com/ws-register/ws-register'),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
@@ -31,8 +34,25 @@ export class WebsocketService {
     this.client.onConnect = (frame) => {
       console.log('Conectado al WebSocket: ' + frame);
       this.connectionStatus$.next(true);
+
       this.reconnectAttempts = 0;
+
+      // Aquí te suscribes y rediriges los mensajes al Subject
+      this.client.subscribe('/topic/registrations', (message: Message) => {
+        try {
+          const data = JSON.parse(message.body);
+          console.log('Parsed data:', data);
+          this.messageSubject.next(data);
+        } catch (error) {
+          console.error('Error parsing message JSON:', error);
+        }
+      });
+
+
     };
+
+
+
 
     this.client.onStompError = (frame) => {
       console.error('Error en STOMP: ' + frame.headers['message']);
