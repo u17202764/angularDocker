@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Client, Message, StompSubscription } from '@stomp/stompjs';
 import  SockJS from 'sockjs-client';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
@@ -14,16 +14,16 @@ export class WebsocketService {
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 5;
   private messageSubject: Subject<any> = new Subject<any>();
+
+  public item = signal<any>('')
   constructor() {
-    this.initializeWebSocketConnection();
+    // this.initializeWebSocketConnection();
   }
 
   private initializeWebSocketConnection(): void {
-
-
     // Configuración de la conexión WebSocket
     this.client = new Client({
-      webSocketFactory: () => new SockJS('https://docker-java-lmse.onrender.com/ws-register/ws-register'),
+      webSocketFactory: () => new SockJS('https://docker-java-lmse.onrender.com/ws-register'),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
@@ -41,18 +41,14 @@ export class WebsocketService {
       this.client.subscribe('/topic/registrations', (message: Message) => {
         try {
           const data = JSON.parse(message.body);
+          this.item.set(data)
           console.log('Parsed data:', data);
           this.messageSubject.next(data);
         } catch (error) {
           console.error('Error parsing message JSON:', error);
         }
       });
-
-
     };
-
-
-
 
     this.client.onStompError = (frame) => {
       console.error('Error en STOMP: ' + frame.headers['message']);
@@ -121,7 +117,7 @@ export class WebsocketService {
   }
 
   // Verificar estado de conexión
-  isConnected(): Observable<boolean> {
+  isConnected(): Observable<boolean> {    
     return this.connectionStatus$.asObservable();
   }
 }

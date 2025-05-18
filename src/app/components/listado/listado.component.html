@@ -38,6 +38,7 @@
         <tr>
           <th>ID</th>
           <th>Nombre</th>
+          <th>Eliminar</th>
         </tr>
       </thead>
       <tbody>
@@ -45,6 +46,9 @@
           <tr>
             <td>{{ item.id }}</td>
             <td>{{ item.nombre }}</td>
+            <td>
+              <button (click)="deleteItem(item.id)">Eliminar {{item.id}}</button>
+            </td>
           </tr>
         }
         @if (currentData().length === 0 && !dataService.isLoading()) {
