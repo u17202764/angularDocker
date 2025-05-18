@@ -99,36 +99,40 @@ export class CategoryNewService {
     ))
   }
 
-  public deleteById(id: number): Observable<void> {
-    return this.http.delete<any>(`${this.apiBASE}eliminarCategoria/${id}`).pipe(
-      switchMap((response) => {
-        if (response?.status !== 'NO_CONTENT') {
-          return throwError(() => new Error('No se pudo eliminar en el servidor'));
-        }
+public deleteById(id: number): Observable<void> {
+  return this.http.delete<any>(`${this.apiBASE}eliminarCategoria/${id}`).pipe(
+    switchMap((response) => {
+      if (response?.status !== 'NO_CONTENT') {
+        return throwError(() => new Error('No se pudo eliminar en el servidor'));
+      }
 
-        return new Observable<void>((observer) => {
-          const db = this.db();
-          if (!db) {
-            observer.error(new Error('Database not initialized'));
-            return;
-          }
+      const db = this.db();
+      if (!db) {
+        return throwError(() => new Error('Database not initialized'));
+      }
 
-          const transaction = db.transaction(this.storeName, 'readwrite');
-          const store = transaction.objectStore(this.storeName);
+      return from(this.deleteFromIndexedDB(db, id));
+    })
+  );
+}
 
-          const deleteRequest = store.delete(id);
-          deleteRequest.onsuccess = () => {
-            this.updateRecordCount();
-            observer.next();
-            observer.complete();
-          };
-          deleteRequest.onerror = () => observer.error(deleteRequest.error);
-        });
-      })
-    );
-  }
+private deleteFromIndexedDB(db: IDBDatabase, id: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(this.storeName, 'readwrite');
+    const store = transaction.objectStore(this.storeName);
 
-
+    transaction.onerror = () => reject(transaction.error);
+    
+    const request = store.delete(id);
+    request.onsuccess = () => {
+      this.updateRecordCount();
+      resolve();
+    };
+    
+    request.onerror = () => reject(request.error);
+  });
+}
+  
   private updateRecordCount(): void {
     if (!this.db) return
     const transaction = this.db()!.transaction(this.storeName, 'readonly')
@@ -154,15 +158,15 @@ export class CategoryNewService {
             observer.complete()
           }
           // ACTIVAR PARA CONSULTAR LA API
-          else {
-            this.fetchFromAPI().subscribe({
-              next: () => {
-                observer.next()
-                observer.complete()
-              },
-              error: (err) => observer.error(err)
-            })
-          }
+          // else {
+          //   this.fetchFromAPI().subscribe({
+          //     next: () => {
+          //       observer.next()
+          //       observer.complete()
+          //     },
+          //     error: (err) => observer.error(err)
+          //   })
+          // }
         }
         countRequest.onerror = () => observer.error(countRequest.error)
       } catch (error) {
