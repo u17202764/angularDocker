@@ -24,7 +24,7 @@ export interface Categoria {
 })
 
 export class CategoryNewService {
-  private readonly apiUrl = 'https://docker-java-lmse.onrender.com/api/public/listadoCategoria'
+  private readonly apiUrl = 'https://docker-java-ylyl.onrender.com/api/public/listadoCategoria'
   private readonly dbName = 'BigDataDB'
   private readonly storeName = 'records'
   private readonly dbVersion = 1
