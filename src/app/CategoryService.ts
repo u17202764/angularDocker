@@ -15,7 +15,7 @@ export class CategoryService {
   private http = inject(HttpClient);
   private readonly CACHE_KEY = 'categorias_cache';
   private readonly CACHE_EXPIRATION = 1000 * 60 * 1; // 5 minutos
-  private readonly URL = 'https://docker-java-lmse.onrender.com/listado';
+  private readonly URL = 'https://docker-java-ylyl.onrender.com/listado';
 
   getAllData(): Observable<Categoria[]> {
     if (!this.cache$) {
